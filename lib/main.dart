@@ -51,7 +51,7 @@ class _MarqueePageState extends State<MarqueePage> {
     _loadMarqueeText();
     _loadVelocity();
     _loadMode().then((_) {
-      _maybeStartAutoFetch(); // 確保mode載入後正確啟動
+      _maybeStartAutoFetch();
     });
     _loadFetchUrl();
     _loadFetchInterval();
@@ -59,9 +59,7 @@ class _MarqueePageState extends State<MarqueePage> {
   }
 
   void _initFullscreenListener() {
-    // 只在Web平台監聽
-    if (kIsWeb) {
-      // ignore: undefined_prefixed_name
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.android) {
       addFullscreenChangeListener(() {
         setState(() {
           _isFullscreen = isCurrentlyFullscreen();
@@ -351,8 +349,7 @@ class _MarqueePageState extends State<MarqueePage> {
         title: const Text('跑馬燈'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
-          // Web專用全螢幕按鈕
-          if (kIsWeb)
+          if (kIsWeb || defaultTargetPlatform == TargetPlatform.android)
             IconButton(
               icon: Icon(_isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen),
               tooltip: _isFullscreen ? '退出全螢幕' : '全螢幕',
