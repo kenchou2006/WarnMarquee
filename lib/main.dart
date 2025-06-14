@@ -18,8 +18,34 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Marquee',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        brightness: Brightness.light,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.light),
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.grey,
+          foregroundColor: Colors.black,
+        ),
+        popupMenuTheme: const PopupMenuThemeData(
+          color: Colors.white,
+          textStyle: TextStyle(color: Colors.black),
+        ),
+        dialogBackgroundColor: Colors.white,
       ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark),
+        scaffoldBackgroundColor: Colors.black,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.grey,
+          foregroundColor: Colors.white,
+        ),
+        popupMenuTheme: PopupMenuThemeData(
+          color: Colors.grey[900],
+          textStyle: const TextStyle(color: Colors.white),
+        ),
+        dialogBackgroundColor: Colors.grey[900],
+      ),
+      themeMode: ThemeMode.system,
       home: const MarqueePage(),
       debugShowCheckedModeBanner: false,
     );
@@ -146,28 +172,46 @@ class _MarqueePageState extends State<MarqueePage> {
 
   Future<void> _showEditDialog() async {
     final controller = TextEditingController(text: marqueeText);
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+    final dialogTheme = Theme.of(context).copyWith(
+      dialogBackgroundColor: isDark ? Colors.grey[900] : Colors.white,
+      textTheme: Theme.of(context).textTheme.apply(
+            bodyColor: isDark ? Colors.white : Colors.black,
+            displayColor: isDark ? Colors.white : Colors.black,
+          ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: isDark ? Colors.black : Colors.grey[200],
+        hintStyle: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600]),
+      ),
+    );
     final result = await showDialog<String>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('自訂訊息內容'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(
-              hintText: '請輸入跑馬燈訊息',
+        return Theme(
+          data: dialogTheme,
+          child: AlertDialog(
+            title: const Text('自訂訊息內容'),
+            content: TextField(
+              controller: controller,
+              autofocus: true,
+              style: TextStyle(color: isDark ? Colors.white : Colors.black),
+              decoration: const InputDecoration(
+                hintText: '請輸入跑馬燈訊息',
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(controller.text),
+                child: const Text('確定'),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(controller.text),
-              child: const Text('確定'),
-            ),
-          ],
         );
       },
     );
@@ -181,29 +225,47 @@ class _MarqueePageState extends State<MarqueePage> {
 
   Future<void> _showVelocityDialog() async {
     final controller = TextEditingController(text: velocity.toStringAsFixed(0));
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+    final dialogTheme = Theme.of(context).copyWith(
+      dialogBackgroundColor: isDark ? Colors.grey[900] : Colors.white,
+      textTheme: Theme.of(context).textTheme.apply(
+            bodyColor: isDark ? Colors.white : Colors.black,
+            displayColor: isDark ? Colors.white : Colors.black,
+          ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: isDark ? Colors.black : Colors.grey[200],
+        hintStyle: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600]),
+      ),
+    );
     final result = await showDialog<String>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('調整滾動速度'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              hintText: '請輸入速度（像素/秒，建議20~200）',
+        return Theme(
+          data: dialogTheme,
+          child: AlertDialog(
+            title: const Text('調整滾動速度'),
+            content: TextField(
+              controller: controller,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              style: TextStyle(color: isDark ? Colors.white : Colors.black),
+              decoration: const InputDecoration(
+                hintText: '請輸入速度（像素/秒，建議20~200）',
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(controller.text),
+                child: const Text('確定'),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(controller.text),
-              child: const Text('確定'),
-            ),
-          ],
         );
       },
     );
@@ -220,28 +282,46 @@ class _MarqueePageState extends State<MarqueePage> {
 
   Future<void> _showFetchUrlDialog() async {
     final controller = TextEditingController(text: fetchUrl);
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+    final dialogTheme = Theme.of(context).copyWith(
+      dialogBackgroundColor: isDark ? Colors.grey[900] : Colors.white,
+      textTheme: Theme.of(context).textTheme.apply(
+            bodyColor: isDark ? Colors.white : Colors.black,
+            displayColor: isDark ? Colors.white : Colors.black,
+          ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: isDark ? Colors.black : Colors.grey[200],
+        hintStyle: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600]),
+      ),
+    );
     final result = await showDialog<String>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('自訂伺服器網址'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(
-              hintText: '請輸入API網址',
+        return Theme(
+          data: dialogTheme,
+          child: AlertDialog(
+            title: const Text('自訂伺服器網址'),
+            content: TextField(
+              controller: controller,
+              autofocus: true,
+              style: TextStyle(color: isDark ? Colors.white : Colors.black),
+              decoration: const InputDecoration(
+                hintText: '請輸入API網址',
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(controller.text),
+                child: const Text('確定'),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(controller.text),
-              child: const Text('確定'),
-            ),
-          ],
         );
       },
     );
@@ -258,29 +338,47 @@ class _MarqueePageState extends State<MarqueePage> {
 
   Future<void> _showFetchIntervalDialog() async {
     final controller = TextEditingController(text: fetchInterval.toString());
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+    final dialogTheme = Theme.of(context).copyWith(
+      dialogBackgroundColor: isDark ? Colors.grey[900] : Colors.white,
+      textTheme: Theme.of(context).textTheme.apply(
+            bodyColor: isDark ? Colors.white : Colors.black,
+            displayColor: isDark ? Colors.white : Colors.black,
+          ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: isDark ? Colors.black : Colors.grey[200],
+        hintStyle: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600]),
+      ),
+    );
     final result = await showDialog<String>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('自訂爬取間隔（秒）'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              hintText: '請輸入間隔秒數（>=1）',
+        return Theme(
+          data: dialogTheme,
+          child: AlertDialog(
+            title: const Text('自訂爬取間隔（秒）'),
+            content: TextField(
+              controller: controller,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              style: TextStyle(color: isDark ? Colors.white : Colors.black),
+              decoration: const InputDecoration(
+                hintText: '請輸入間隔秒數（>=1）',
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(controller.text),
+                child: const Text('確定'),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(controller.text),
-              child: const Text('確定'),
-            ),
-          ],
         );
       },
     );
@@ -344,10 +442,14 @@ class _MarqueePageState extends State<MarqueePage> {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final isDarkMode = brightness == Brightness.dark;
+    final popupMenuColor = isDarkMode ? Colors.grey[900] : Colors.white;
+    final popupMenuTextColor = isDarkMode ? Colors.white : Colors.black;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('跑馬燈'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('智慧跑馬燈'),
         actions: [
           if (kIsWeb || defaultTargetPlatform == TargetPlatform.android)
             IconButton(
@@ -493,19 +595,26 @@ class _MarqueeWidgetState extends State<MarqueeWidget> with SingleTickerProvider
 
   void _startMarquee() {
     final style = widget.style ?? const TextStyle();
+    final mediaQuery = MediaQuery.maybeOf(context);
+    final textScale = mediaQuery?.textScaleFactor ?? 1.0;
     final textPainter = TextPainter(
       text: TextSpan(text: widget.text + '\u00A0', style: style),
       textDirection: TextDirection.ltr,
       textAlign: TextAlign.left,
       maxLines: 1,
+      textScaleFactor: textScale,
     )..layout(
         minWidth: 0,
         maxWidth: double.infinity,
       );
 
-    _textWidth = textPainter.width;
+    final newTextWidth = textPainter.width;
+    final shouldAnimate = newTextWidth > 0 && _containerWidth > 0 && newTextWidth > _containerWidth;
 
-    final shouldAnimate = _textWidth > 0 && _containerWidth > 0 && _textWidth > _containerWidth;
+    if (_textWidth != newTextWidth) {
+      _textWidth = newTextWidth;
+    }
+
     if (shouldAnimate) {
       final distance = _textWidth + _gap;
       final duration = Duration(milliseconds: (distance / widget.velocity * 1000).toInt());
@@ -534,6 +643,10 @@ class _MarqueeWidgetState extends State<MarqueeWidget> with SingleTickerProvider
           _containerWidth = constraints.maxWidth;
           WidgetsBinding.instance.addPostFrameCallback((_) => _startMarquee());
         }
+        final fontSize = widget.style?.fontSize ?? constraints.maxHeight;
+        if (constraints.maxHeight == 0 || fontSize == 0) {
+          return const SizedBox.shrink();
+        }
         return ClipRect(
           child: AnimatedBuilder(
             animation: _controller,
@@ -544,15 +657,11 @@ class _MarqueeWidgetState extends State<MarqueeWidget> with SingleTickerProvider
                   child: SizedBox(
                     width: _containerWidth,
                     height: constraints.maxHeight,
-                    child: FittedBox(
-                      fit: BoxFit.fitHeight,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        widget.text,
-                        style: widget.style,
-                        maxLines: 1,
-                        overflow: TextOverflow.visible,
-                      ),
+                    child: Text(
+                      widget.text,
+                      style: widget.style,
+                      maxLines: 1,
+                      overflow: TextOverflow.clip,
                     ),
                   ),
                 );
@@ -568,45 +677,22 @@ class _MarqueeWidgetState extends State<MarqueeWidget> with SingleTickerProvider
                         SizedBox(
                           width: _textWidth,
                           height: constraints.maxHeight,
-                          child: FittedBox(
-                            fit: BoxFit.fitHeight,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              widget.text,
-                              style: widget.style,
-                              maxLines: 1,
-                              overflow: TextOverflow.visible,
-                            ),
+                          child: Text(
+                            widget.text,
+                            style: widget.style,
+                            maxLines: 1,
+                            overflow: TextOverflow.clip,
                           ),
                         ),
                         SizedBox(width: _gap),
                         SizedBox(
                           width: _textWidth,
                           height: constraints.maxHeight,
-                          child: FittedBox(
-                            fit: BoxFit.fitHeight,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              widget.text,
-                              style: widget.style,
-                              maxLines: 1,
-                              overflow: TextOverflow.visible,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: _gap),
-                        SizedBox(
-                          width: _textWidth,
-                          height: constraints.maxHeight,
-                          child: FittedBox(
-                            fit: BoxFit.fitHeight,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              widget.text,
-                              style: widget.style,
-                              maxLines: 1,
-                              overflow: TextOverflow.visible,
-                            ),
+                          child: Text(
+                            widget.text,
+                            style: widget.style,
+                            maxLines: 1,
+                            overflow: TextOverflow.clip,
                           ),
                         ),
                       ],
