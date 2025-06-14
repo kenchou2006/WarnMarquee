@@ -412,17 +412,40 @@ class _MarqueePageState extends State<MarqueePage> {
       body: Center(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final fontSize = constraints.maxWidth * 0.25;
+            if (constraints.maxHeight > constraints.maxWidth) {
+              return const Center(
+                child: Text(
+                  '請將裝置切換為橫向以顯示跑馬燈',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
+            final verticalPadding = 40.0;
+            final horizontalPadding = 16.0;
+            final availableHeight = constraints.maxHeight - verticalPadding * 2;
+            final availableWidth = constraints.maxWidth - horizontalPadding * 2;
+            final fontSize = availableHeight;
+
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
-              child: MarqueeWidget(
-                text: marqueeText,
-                style: TextStyle(
-                  fontSize: fontSize,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+              child: SizedBox(
+                height: availableHeight,
+                width: availableWidth,
+                child: MarqueeWidget(
+                  text: marqueeText,
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    height: 1.0,
+                  ),
+                  velocity: velocity,
                 ),
-                velocity: velocity,
               ),
             );
           },
@@ -465,9 +488,7 @@ class _MarqueeWidgetState extends State<MarqueeWidget> with SingleTickerProvider
   @override
   void didUpdateWidget(covariant MarqueeWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text || oldWidget.style != widget.style || oldWidget.velocity != widget.velocity) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _startMarquee());
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startMarquee());
   }
 
   void _startMarquee() {
@@ -475,19 +496,27 @@ class _MarqueeWidgetState extends State<MarqueeWidget> with SingleTickerProvider
     final textPainter = TextPainter(
       text: TextSpan(text: widget.text + '\u00A0', style: style),
       textDirection: TextDirection.ltr,
-    )..layout();
+      textAlign: TextAlign.left,
+      maxLines: 1,
+    )..layout(
+        minWidth: 0,
+        maxWidth: double.infinity,
+      );
 
     _textWidth = textPainter.width;
 
-    if (_textWidth == 0) return;
-
-    final distance = _textWidth + _gap;
-    final duration = Duration(milliseconds: (distance / widget.velocity * 1000).toInt());
-
-    _controller.stop();
-    _controller.reset();
-    _controller.duration = duration;
-    _controller.repeat();
+    final shouldAnimate = _textWidth > 0 && _containerWidth > 0 && _textWidth > _containerWidth;
+    if (shouldAnimate) {
+      final distance = _textWidth + _gap;
+      final duration = Duration(milliseconds: (distance / widget.velocity * 1000).toInt());
+      _controller.stop();
+      _controller.reset();
+      _controller.duration = duration;
+      _controller.repeat();
+    } else {
+      _controller.stop();
+      _controller.reset();
+    }
     setState(() {});
   }
 
@@ -514,7 +543,17 @@ class _MarqueeWidgetState extends State<MarqueeWidget> with SingleTickerProvider
                   alignment: Alignment.centerLeft,
                   child: SizedBox(
                     width: _containerWidth,
-                    child: Text(widget.text, style: widget.style),
+                    height: constraints.maxHeight,
+                    child: FittedBox(
+                      fit: BoxFit.fitHeight,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        widget.text,
+                        style: widget.style,
+                        maxLines: 1,
+                        overflow: TextOverflow.visible,
+                      ),
+                    ),
                   ),
                 );
               }
@@ -524,20 +563,51 @@ class _MarqueeWidgetState extends State<MarqueeWidget> with SingleTickerProvider
                   Positioned(
                     left: offset,
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(
                           width: _textWidth,
-                          child: Text(widget.text, style: widget.style),
+                          height: constraints.maxHeight,
+                          child: FittedBox(
+                            fit: BoxFit.fitHeight,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              widget.text,
+                              style: widget.style,
+                              maxLines: 1,
+                              overflow: TextOverflow.visible,
+                            ),
+                          ),
                         ),
                         SizedBox(width: _gap),
                         SizedBox(
                           width: _textWidth,
-                          child: Text(widget.text, style: widget.style),
+                          height: constraints.maxHeight,
+                          child: FittedBox(
+                            fit: BoxFit.fitHeight,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              widget.text,
+                              style: widget.style,
+                              maxLines: 1,
+                              overflow: TextOverflow.visible,
+                            ),
+                          ),
                         ),
                         SizedBox(width: _gap),
                         SizedBox(
                           width: _textWidth,
-                          child: Text(widget.text, style: widget.style),
+                          height: constraints.maxHeight,
+                          child: FittedBox(
+                            fit: BoxFit.fitHeight,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              widget.text,
+                              style: widget.style,
+                              maxLines: 1,
+                              overflow: TextOverflow.visible,
+                            ),
+                          ),
                         ),
                       ],
                     ),
