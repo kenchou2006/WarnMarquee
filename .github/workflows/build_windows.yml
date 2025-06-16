@@ -1,0 +1,45 @@
+name: Build and Release Windows App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-windows:
+    name: Build Windows and Release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.2'
+
+      - name: Enable Windows Desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows app
+        run: flutter build windows
+
+      - name: Create zip archive
+        run: |
+          powershell Compress-Archive -Path build/windows/runner/Release/* -DestinationPath windows-release.zip
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest Build
+          body: |
+            This is an automated Windows build from the main branch.
+          files: windows-release.zip
+          append_release_assets: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

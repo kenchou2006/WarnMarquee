@@ -29,9 +29,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: Latest APK Build
+          name: Latest Build
           body: |
-            This is an automated APK build from main branch.
+            This is an automated build from main branch.
           files: build/app/outputs/flutter-apk/app-release.apk
+          append_release_assets: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
