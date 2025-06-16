@@ -40,7 +40,7 @@ jobs:
           tag_name: latest
           name: Latest Build
           body: |
-            This is an automated Windows build from the main branch.
+            This is an automated build from main branch.
           files: windows-release.zip
           append_release_assets: true
         env:
