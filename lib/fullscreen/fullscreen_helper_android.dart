@@ -26,3 +26,4 @@ void addFullscreenChangeListener(void Function() cb) {
     _listeners.add(cb);
   }
 }
+

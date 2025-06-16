@@ -31,3 +31,4 @@ void addFullscreenChangeListener(void Function() cb) {
   html.document.addEventListener('fullscreenchange', (_) => cb());
   html.document.addEventListener('webkitfullscreenchange', (_) => cb());
 }
+
