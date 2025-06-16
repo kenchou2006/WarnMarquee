@@ -70,6 +70,7 @@ class _MarqueePageState extends State<MarqueePage> {
   String fetchUrl = 'https://warningsign.pp.ua/marquee/message_json/';
   int fetchInterval = 3;
   bool _isFullscreen = false;
+  double? fontSize;
 
   @override
   void initState() {
@@ -82,6 +83,7 @@ class _MarqueePageState extends State<MarqueePage> {
     _loadFetchUrl();
     _loadFetchInterval();
     _initFullscreenListener();
+    _loadFontSize();
   }
 
   void _initFullscreenListener() {
@@ -168,6 +170,21 @@ class _MarqueePageState extends State<MarqueePage> {
   Future<void> _saveFetchInterval(int interval) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('marquee_fetch_interval', interval);
+  }
+
+  Future<void> _loadFontSize() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getDouble('marquee_font_size');
+    if (saved != null && saved > 0) {
+      setState(() {
+        fontSize = saved;
+      });
+    }
+  }
+
+  Future<void> _saveFontSize(double size) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('marquee_font_size', size);
   }
 
   Future<void> _showEditDialog() async {
@@ -396,6 +413,24 @@ class _MarqueePageState extends State<MarqueePage> {
     }
   }
 
+  Future<void> _showFontSizeDialog() async {
+    double? initialFontSize = (fontSize != null && fontSize! > 0) ? fontSize : null;
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return _FontSizeDialog(
+          initialFontSize: initialFontSize,
+          onFontSizeChanged: (newSize) {
+            setState(() {
+              fontSize = newSize;
+            });
+            _saveFontSize(newSize);
+          },
+        );
+      },
+    );
+  }
+
   void _maybeStartAutoFetch() {
     _timer?.cancel();
     if (mode == MarqueeMode.auto) {
@@ -469,6 +504,8 @@ class _MarqueePageState extends State<MarqueePage> {
                 _showEditDialog();
               } else if (value == 'velocity') {
                 _showVelocityDialog();
+              } else if (value == 'font_size') {
+                _showFontSizeDialog();
               } else if (value == 'fetch_url') {
                 _showFetchUrlDialog();
               } else if (value == 'fetch_interval') {
@@ -487,6 +524,10 @@ class _MarqueePageState extends State<MarqueePage> {
               const PopupMenuItem(
                 value: 'velocity',
                 child: Text('調整滾動速度'),
+              ),
+              const PopupMenuItem(
+                value: 'font_size',
+                child: Text('調整字體大小'),
               ),
               const PopupMenuItem(
                 value: 'fetch_url',
@@ -531,24 +572,33 @@ class _MarqueePageState extends State<MarqueePage> {
             final horizontalPadding = 16.0;
             final availableHeight = constraints.maxHeight - verticalPadding * 2;
             final availableWidth = constraints.maxWidth - horizontalPadding * 2;
-            final fontSize = availableHeight;
+            final maxFontSize = availableHeight;
+            final usedFontSize = (fontSize != null && fontSize! <= maxFontSize)
+                ? fontSize!
+                : maxFontSize;
 
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
-              child: SizedBox(
-                height: availableHeight,
-                width: availableWidth,
-                child: MarqueeWidget(
-                  text: marqueeText,
-                  style: TextStyle(
-                    fontSize: fontSize,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    height: 1.0,
+            return Column(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+                    child: SizedBox(
+                      height: availableHeight,
+                      width: availableWidth,
+                      child: MarqueeWidget(
+                        text: marqueeText,
+                        style: TextStyle(
+                          fontSize: usedFontSize,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          height: 1.0,
+                        ),
+                        velocity: velocity,
+                      ),
+                    ),
                   ),
-                  velocity: velocity,
                 ),
-              ),
+              ],
             );
           },
         ),
@@ -704,6 +754,82 @@ class _MarqueeWidgetState extends State<MarqueeWidget> with SingleTickerProvider
           ),
         );
       },
+    );
+  }
+}
+
+class _FontSizeDialog extends StatefulWidget {
+  final double? initialFontSize;
+  final ValueChanged<double> onFontSizeChanged;
+  const _FontSizeDialog({this.initialFontSize, required this.onFontSizeChanged});
+
+  @override
+  State<_FontSizeDialog> createState() => _FontSizeDialogState();
+}
+
+class _FontSizeDialogState extends State<_FontSizeDialog> {
+  late double tempFontSize;
+  double? minFontSize;
+  double? maxFontSize;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final constraints = MediaQuery.of(context).size;
+    final verticalPadding = 40.0;
+    maxFontSize = constraints.height - verticalPadding * 2;
+    minFontSize = 12.0;
+    tempFontSize = (widget.initialFontSize ?? maxFontSize!).clamp(minFontSize!, maxFontSize!);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+    final dialogTheme = Theme.of(context).copyWith(
+      dialogBackgroundColor: isDark ? Colors.grey[900] : Colors.white,
+      textTheme: Theme.of(context).textTheme.apply(
+            bodyColor: isDark ? Colors.white : Colors.black,
+            displayColor: isDark ? Colors.white : Colors.black,
+          ),
+    );
+    return Theme(
+      data: dialogTheme,
+      child: AlertDialog(
+        title: const Text('調整字體大小'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Slider(
+              value: tempFontSize,
+              min: minFontSize!,
+              max: maxFontSize!,
+              divisions: (maxFontSize! - minFontSize!).clamp(1, 100).toInt(),
+              label: tempFontSize.toStringAsFixed(0),
+              onChanged: (value) {
+                setState(() {
+                  tempFontSize = value;
+                });
+                widget.onFontSizeChanged(tempFontSize);
+              },
+            ),
+            Text('字體大小: ${tempFontSize.toStringAsFixed(0)}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () {
+              widget.onFontSizeChanged(tempFontSize);
+              Navigator.of(context).pop();
+            },
+            child: const Text('確定'),
+          ),
+        ],
+      ),
     );
   }
 }
