@@ -29,8 +29,10 @@ jobs:
         run: flutter build windows
 
       - name: Create zip archive
+        shell: powershell
         run: |
-          powershell Compress-Archive -Path build/windows/runner/Release/* -DestinationPath windows-release.zip
+          $files = Get-ChildItem -Path build/windows/x64/runner/Release -Recurse | Select-Object -ExpandProperty FullName
+          Compress-Archive -Path $files -DestinationPath windows-release.zip
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
